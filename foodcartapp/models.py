@@ -83,10 +83,6 @@ class Product(models.Model):
         max_length=200,
         blank=True,
     )
-    quantity = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Количество',
-    )
 
     objects = ProductQuerySet.as_manager()
 
@@ -137,16 +133,12 @@ class Order(models.Model):
     customer_lastname = models.CharField(
         'Фамилия клиента',
         max_length=50,
+        blank=True,
         db_index=True,
     )
     phonenumber = PhoneNumberField(
         'Номер владельца',
         db_index=True,
-    )
-    product = models.ManyToManyField(
-        Product,
-        verbose_name='Товар',
-        related_name='Товары',
     )
 
     class Meta:
@@ -155,3 +147,31 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.customer_name} {self.customer_lastname}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        verbose_name='Заказ',
+        related_name='items',
+        null=True,
+    )
+    quantity = models.PositiveIntegerField(
+        'Количество',
+        null=True,
+    )
+    product = models.ForeignKey(
+        Product,
+        verbose_name='Продукт',
+        related_name='order_items',
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Элемент заказа'
+        verbose_name_plural = 'Элементы заказа'
+
+    def __str__(self):
+        return '{}'.format(self.product.name)
