@@ -1,4 +1,5 @@
 import json
+from rest_framework import status
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
@@ -68,19 +69,26 @@ def register_order(request):
         return Response({
             'error': 'Ошибка в значениях',
         })
+    print(order)
     new_order = Order.objects.create(
         customer_name=order['firstname'],
         customer_lastname=order.get('lastname', ''),
         phonenumber=order['phonenumber'],
     )
-    for product_in_order in order['products']:
-        quantity = product_in_order['quantity']
-        product = Product.objects.get(
-            id=product_in_order['product'],
-        )
-        OrderItem.objects.create(
-            order=new_order,
-            quantity=quantity,
-            product=product,
-        )
-    return Response(request.data)
+    if (order.get('products')
+        and isinstance(order['products'], list)
+            and len(order['products']) != 0):
+        for product_in_order in order['products']:
+            quantity = product_in_order['quantity']
+            product = Product.objects.get(
+                id=product_in_order['product'],
+            )
+            OrderItem.objects.create(
+                order=new_order,
+                quantity=quantity,
+                product=product,
+            )
+        return Response(request.data)
+    else:
+        content = {'error': 'products key not presented or not list'}
+        return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
