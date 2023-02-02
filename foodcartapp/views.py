@@ -1,9 +1,10 @@
 import json
-from rest_framework import status
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 
 from .models import Product, Order, OrderItem
@@ -61,34 +62,33 @@ def product_list_api(request):
     })
 
 
+class OrderItemSerializer(ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    class Meta:
+        model = OrderItem
+        fields = ['quantity', 'product']
+
+
+class OrderSerializer(ModelSerializer):
+    products = OrderItemSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = Order
+        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+
+
 @api_view(['POST'])
 def register_order(request):
-    try:
-        order = request.data
-    except ValueError:
-        return Response({
-            'error': 'Ошибка в значениях',
-        })
-    print(order)
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     new_order = Order.objects.create(
-        customer_name=order['firstname'],
-        customer_lastname=order.get('lastname', ''),
-        phonenumber=order['phonenumber'],
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
+        address=serializer.validated_data['address'],
     )
-    if (order.get('products')
-        and isinstance(order['products'], list)
-            and len(order['products']) != 0):
-        for product_in_order in order['products']:
-            quantity = product_in_order['quantity']
-            product = Product.objects.get(
-                id=product_in_order['product'],
-            )
-            OrderItem.objects.create(
-                order=new_order,
-                quantity=quantity,
-                product=product,
-            )
-        return Response(request.data)
-    else:
-        content = {'error': 'products key not presented or not list'}
-        return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    order_items_fields = serializer.validated_data['products']
+    order_items = [OrderItem(order=new_order, **fields) for fields in order_items_fields]
+    OrderItem.objects.bulk_create(order_items)
+    return Response({'Создан заказ': new_order.id})

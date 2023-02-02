@@ -125,12 +125,12 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
-    customer_name = models.CharField(
+    firstname = models.CharField(
         'Имя клиента',
         max_length=50,
         db_index=True,
     )
-    customer_lastname = models.CharField(
+    lastname = models.CharField(
         'Фамилия клиента',
         max_length=50,
         blank=True,
@@ -140,13 +140,19 @@ class Order(models.Model):
         'Номер владельца',
         db_index=True,
     )
+    address = models.CharField(
+        'Адрес доставки',
+        max_length=50,
+        blank=True,
+        db_index=True,
+    )
 
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
     def __str__(self):
-        return f"{self.customer_name} {self.customer_lastname}"
+        return f"{self.firstname} {self.lastname}"
 
 
 class OrderItem(models.Model):
@@ -154,7 +160,7 @@ class OrderItem(models.Model):
         Order,
         on_delete=models.SET_NULL,
         verbose_name='Заказ',
-        related_name='items',
+        related_name='products',
         null=True,
     )
     quantity = models.PositiveIntegerField(
