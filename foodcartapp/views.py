@@ -1,6 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.templatetags.static import static
+from django.forms.models import model_to_dict
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
@@ -8,6 +9,7 @@ from rest_framework import serializers
 
 
 from .models import Product, Order, OrderItem
+from .serializers import GetOrderSerializer
 
 
 def banners_list_api(request):
@@ -63,7 +65,8 @@ def product_list_api(request):
 
 
 class OrderItemSerializer(ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+
     class Meta:
         model = OrderItem
         fields = ['quantity', 'product']
@@ -91,4 +94,9 @@ def register_order(request):
     order_items_fields = serializer.validated_data['products']
     order_items = [OrderItem(order=new_order, **fields) for fields in order_items_fields]
     OrderItem.objects.bulk_create(order_items)
-    return Response({'Создан заказ': new_order.id})
+
+    serializer = GetOrderSerializer(data=model_to_dict(new_order))
+    serializer.is_valid(raise_exception=True)
+    if serializer.is_valid():
+        serializer.validated_data['phonenumber'] = str(new_order.phonenumber)
+    return Response(serializer.validated_data)
