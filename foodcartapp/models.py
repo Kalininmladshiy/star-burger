@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, DecimalValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, F
 
@@ -184,6 +184,13 @@ class OrderItem(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
+    price = models.DecimalField(
+        'цена',
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        validators=[MinValueValidator(0), DecimalValidator(8, 2)],
+    )
 
     class Meta:
         verbose_name = 'Элемент заказа'
@@ -191,3 +198,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return '{}'.format(self.product.name)
+
+    def get_cost(self):
+        return self.price * self.quantity
