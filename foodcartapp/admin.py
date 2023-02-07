@@ -111,7 +111,7 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     fields = ('product', 'quantity', 'price')
-    readonly_fields = ('product',)
+    #readonly_fields = ('product',)
 
 
 @admin.register(Order)
@@ -120,6 +120,15 @@ class Order(admin.ModelAdmin):
     list_display = ('firstname', 'lastname', 'phonenumber')
     list_filter = ('phonenumber',)
     inlines = [OrderItemInline]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for instance in instances:
+            instance.price = instance.product.price
+            instance.save()
+        formset.save_m2m()
 
 
 @admin.register(OrderItem)

@@ -189,6 +189,7 @@ class OrderItem(models.Model):
         max_digits=8,
         decimal_places=2,
         null=True,
+        blank=True,
         validators=[MinValueValidator(0), DecimalValidator(8, 2)],
     )
 
@@ -197,7 +198,7 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Элементы заказа'
 
     def __str__(self):
-        return '{}'.format(self.product.name)
+        return '{}'.format(self.id)
 
     def get_cost(self):
         return self.price * self.quantity
