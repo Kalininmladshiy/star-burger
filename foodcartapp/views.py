@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from .models import Product, Order, OrderItem
 from .serializers import GetOrderSerializer
+from django.db import transaction
 
 
 def banners_list_api(request):
@@ -80,6 +81,7 @@ class OrderSerializer(ModelSerializer):
         fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
 
 
+@transaction.atomic
 @api_view(['POST'])
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
