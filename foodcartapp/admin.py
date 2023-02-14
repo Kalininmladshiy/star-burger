@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.shortcuts import reverse
+from django.shortcuts import redirect
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Product
 from .models import ProductCategory
@@ -111,7 +113,6 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     fields = ('product', 'quantity', 'price')
-    #readonly_fields = ('product',)
 
 
 @admin.register(Order)
@@ -129,6 +130,16 @@ class Order(admin.ModelAdmin):
             instance.price = instance.product.price
             instance.save()
         formset.save_m2m()
+
+    def response_change(self, request, obj):
+        res = super(Order, self).response_change(request, obj)
+        if "next" in request.GET:
+            if url_has_allowed_host_and_scheme(request.GET['next'], None):
+                return redirect(request.GET['next'])
+            else:
+                raise
+        else:
+            return res
 
 
 @admin.register(OrderItem)
