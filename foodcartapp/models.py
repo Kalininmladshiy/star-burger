@@ -166,6 +166,11 @@ class Order(models.Model):
             ('у курьера', 'У курьера'),
             ('выполнен', 'Выполнен'),
         ))
+    comment = models.CharField(
+        'Комментарий',
+        max_length=50,
+        blank=True,
+    )
     objects = OrderQuerySet.as_manager()
 
     class Meta:
