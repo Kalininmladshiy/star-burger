@@ -178,8 +178,17 @@ class Order(models.Model):
         db_index=True,
         default=timezone.now,
     )
-    called_at = models.DateTimeField('Время звонка', null=True, db_index=True)
-    delivered_at = models.DateTimeField('Время доставки', null=True, db_index=True)
+    called_at = models.DateTimeField('Время звонка', null=True, blank=True, db_index=True)
+    delivered_at = models.DateTimeField('Время доставки', null=True, blank=True, db_index=True)
+    pay_method = models.CharField(
+        'Способ оплаты',
+        max_length=20,
+        blank=True,
+        db_index=True,
+        choices=(
+            ('Сразу, электронно', 'Сразу, электронно'),
+            ('Наличными', 'Наличными'),
+        ))
     objects = OrderQuerySet.as_manager()
 
     class Meta:
