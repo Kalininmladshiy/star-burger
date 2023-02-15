@@ -117,9 +117,9 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class Order(admin.ModelAdmin):
-    search_fields = ('firstname', 'lastname', 'order_status', 'phonenumber')
-    list_display = ('firstname', 'lastname', 'order_status', 'phonenumber')
-    list_filter = ('phonenumber', 'order_status')
+    search_fields = ('firstname', 'lastname', 'order_status', 'phonenumber', 'registrated_at', 'called_at', 'delivered_at')
+    list_display = ('firstname', 'lastname', 'order_status', 'phonenumber', 'registrated_at', 'called_at', 'delivered_at')
+    list_filter = ('phonenumber', 'order_status', 'registrated_at', 'called_at', 'delivered_at')
     inlines = [OrderItemInline]
 
     def save_formset(self, request, form, formset, change):
