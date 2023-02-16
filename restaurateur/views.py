@@ -9,6 +9,7 @@ from django.contrib.auth import views as auth_views
 
 
 from foodcartapp.models import Product, Restaurant, Order
+from django.db.models import Q
 
 
 class Login(forms.Form):
@@ -92,7 +93,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders_with_products = Order.objects.products().filter(order_status='необработанный')
+    orders_with_products = Order.objects.products().filter(~Q(order_status='выполнен'))
     return render(request, template_name='order_items.html', context={
         'orders': orders_with_products,
     })

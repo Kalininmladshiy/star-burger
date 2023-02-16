@@ -131,6 +131,11 @@ class Order(admin.ModelAdmin):
             instance.save()
         formset.save_m2m()
 
+    def save_model(self, request, obj, form, change):
+        if obj.restaurant:
+            obj.order_status = 'готовится'
+            obj.save()
+
     def response_change(self, request, obj):
         res = super(Order, self).response_change(request, obj)
         if "next" in request.GET:
@@ -140,6 +145,24 @@ class Order(admin.ModelAdmin):
                 raise
         else:
             return res
+
+    def formfield_for_foreignkey(self, restaurant, request, **kwargs):
+        order_id = request.resolver_match.kwargs['object_id']
+        order = super().get_queryset(request).get(id=order_id)
+        order_items = order.products.all()
+        product_ids = [order_item.product.id for order_item in order_items]
+        restaurants = []
+        for product_id in product_ids:
+            available_restaurants = []
+            for item in RestaurantMenuItem.objects.filter(product=product_id, availability=True):
+                available_restaurants.append(item.restaurant.id)
+            restaurants.append(available_restaurants)
+
+        for i in range(0, len(restaurants)):
+            restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
+        available_restaurants = restaurants[0]
+        kwargs["queryset"] = Restaurant.objects.filter(id__in=available_restaurants)
+        return super().formfield_for_foreignkey(restaurant, request, **kwargs)
 
 
 @admin.register(OrderItem)

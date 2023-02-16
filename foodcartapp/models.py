@@ -189,6 +189,14 @@ class Order(models.Model):
             ('Сразу, электронно', 'Сразу, электронно'),
             ('Наличными', 'Наличными'),
         ))
+    restaurant = models.ForeignKey(
+        Restaurant,
+        verbose_name='Ресторан',
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     objects = OrderQuerySet.as_manager()
 
     class Meta:
@@ -197,6 +205,24 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
+
+    def get_available_restaurants(self):
+        if not self.restaurant:
+            order_items = self.products.all()
+            product_ids = [order_item.product.id for order_item in order_items]
+            restaurants = []
+            for product_id in product_ids:
+                available_restaurants = []
+                for item in RestaurantMenuItem.objects.filter(product=product_id, availability=True):
+                    available_restaurants.append(item.restaurant.name)
+                restaurants.append(available_restaurants)
+
+            for i in range(0, len(restaurants)):
+                restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
+            available_restaurants = restaurants[0]
+            return available_restaurants
+        else:
+            return [self.restaurant.name]
 
 
 class OrderItem(models.Model):
