@@ -213,7 +213,11 @@ class Order(models.Model):
             restaurants = []
             for product_id in product_ids:
                 available_restaurants = []
-                for item in RestaurantMenuItem.objects.filter(product=product_id, availability=True):
+                restaurant_menu_items = RestaurantMenuItem.objects.filter(
+                    product=product_id,
+                    availability=True,
+                ).prefetch_related('restaurant')
+                for item in restaurant_menu_items:
                     available_restaurants.append(item.restaurant.name)
                 restaurants.append(available_restaurants)
 
