@@ -239,7 +239,6 @@ class Order(models.Model):
             restaurant_coordinates = fetch_coordinates(address)
             rest_distance = distance.distance(clients_coordinates, restaurant_coordinates).km
             available_restaurants_distance.append((restaurant, rest_distance))
-        print(available_restaurants_distance)
         return sorted(available_restaurants_distance, key=lambda item: item[1])
 
 
