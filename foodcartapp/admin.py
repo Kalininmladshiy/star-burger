@@ -11,6 +11,9 @@ from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import Order, OrderItem
 
+from distance.models import Place
+from restaurateur.utils import fetch_coordinates
+
 
 class RestaurantMenuItemInline(admin.TabularInline):
     model = RestaurantMenuItem
@@ -135,6 +138,14 @@ class Order(admin.ModelAdmin):
         if obj.restaurant:
             obj.order_status = 'готовится'
             obj.save()
+        if 'address' in form.changed_data:
+            place, created = Place.objects.get_or_create(address=obj.address)
+            if created:
+                lat, lon = fetch_coordinates(obj.address)
+                place.lat = lat
+                place.save()
+                place.lon = lon
+                place.save()
 
     def response_change(self, request, obj):
         res = super(Order, self).response_change(request, obj)
