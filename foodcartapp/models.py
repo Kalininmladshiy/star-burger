@@ -3,6 +3,8 @@ from django.core.validators import MinValueValidator, DecimalValidator
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, F
 from django.utils import timezone
+from geopy import distance
+from restaurateur.utils import fetch_coordinates
 
 
 class Restaurant(models.Model):
@@ -227,6 +229,18 @@ class Order(models.Model):
             return available_restaurants
         else:
             return [self.restaurant.name]
+
+    def get_distance(self):
+        available_restaurants = self.get_available_restaurants()
+        clients_coordinates = fetch_coordinates(self.address)
+        available_restaurants_distance = []
+        for restaurant in available_restaurants:
+            address = Restaurant.objects.get(name=restaurant).address
+            restaurant_coordinates = fetch_coordinates(address)
+            rest_distance = distance.distance(clients_coordinates, restaurant_coordinates).km
+            available_restaurants_distance.append((restaurant, rest_distance))
+        print(available_restaurants_distance)
+        return sorted(available_restaurants_distance, key=lambda item: item[1])
 
 
 class OrderItem(models.Model):

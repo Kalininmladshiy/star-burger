@@ -38,8 +38,9 @@
         <td>
           <details>
             <summary> Нажми </summary>
-              {% for restaurant in order.get_available_restaurants %}
-                {{ restaurant }}
+              {% for restaurant in order.get_distance %}
+                 {{ restaurant.0 }}
+                 {{ restaurant.1 }}
               {% endfor %}
           </details>
         </td>
