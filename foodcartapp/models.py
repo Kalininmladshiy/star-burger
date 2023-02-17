@@ -5,6 +5,7 @@ from django.db.models import Sum, F
 from django.utils import timezone
 from geopy import distance
 from restaurateur.utils import fetch_coordinates
+from distance.models import Place
 
 
 class Restaurant(models.Model):
@@ -232,13 +233,16 @@ class Order(models.Model):
 
     def get_distance(self):
         available_restaurants = self.get_available_restaurants()
-        clients_coordinates = fetch_coordinates(self.address)
+        clients_place, create = Place.objects.get_or_create(address=self.address)
+        clients_coordinates = [clients_place.lat, clients_place.lon]
         available_restaurants_distance = []
         for restaurant in available_restaurants:
             address = Restaurant.objects.get(name=restaurant).address
-            restaurant_coordinates = fetch_coordinates(address)
+            restaurant_place = Place.objects.get(address=address)
+            restaurant_coordinates = [restaurant_place.lat, restaurant_place.lon]
             rest_distance = distance.distance(clients_coordinates, restaurant_coordinates).km
             available_restaurants_distance.append((restaurant, rest_distance))
+        print(available_restaurants_distance)
         return sorted(available_restaurants_distance, key=lambda item: item[1])
 
 
