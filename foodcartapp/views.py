@@ -9,8 +9,10 @@ from rest_framework import serializers
 
 
 from .models import Product, Order, OrderItem
+from distance.models import Place
 from .serializers import GetOrderSerializer
 from django.db import transaction
+from restaurateur.utils import fetch_coordinates
 
 
 def banners_list_api(request):
@@ -86,11 +88,12 @@ class OrderSerializer(ModelSerializer):
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    address = serializer.validated_data['address']
     new_order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
         phonenumber=serializer.validated_data['phonenumber'],
-        address=serializer.validated_data['address'],
+        address=address,
     )
 
     order_items_fields = serializer.validated_data['products']
@@ -100,6 +103,14 @@ def register_order(request):
         **fields,
     ) for fields in order_items_fields]
     OrderItem.objects.bulk_create(order_items)
+
+    place, created = Place.objects.get_or_create(address=address)
+    if created:
+        lat, lon = fetch_coordinates(address)
+        place.lat = lat
+        place.save()
+        place.lon = lon
+        place.save()
 
     serializer = GetOrderSerializer(data=model_to_dict(new_order))
     serializer.is_valid(raise_exception=True)
