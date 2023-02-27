@@ -130,7 +130,7 @@ class Order(admin.ModelAdmin):
         for obj in formset.deleted_objects:
             obj.delete()
         for instance in instances:
-            instance.price = instance.product.price
+            instance.price = instance.order_items.price
             instance.save()
         formset.save_m2m()
 
@@ -160,7 +160,7 @@ class Order(admin.ModelAdmin):
     def formfield_for_foreignkey(self, restaurant, request, **kwargs):
         order_id = request.resolver_match.kwargs['object_id']
         order = super().get_queryset(request).get(id=order_id)
-        order_items = order.products.all()
+        order_items = order.order_items.all()
         product_ids = [order_item.product.id for order_item in order_items]
         restaurants = []
         for product_id in product_ids:

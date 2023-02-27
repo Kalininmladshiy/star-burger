@@ -132,7 +132,7 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
     def products(self):
         products_in_order = Order.objects.annotate(
-            total_cost=Sum(F('products__price') * F('products__quantity'))
+            total_cost=Sum(F('order_items__price') * F('order_items__quantity'))
         ).order_by('id')
         return products_in_order
 
@@ -211,7 +211,7 @@ class Order(models.Model):
 
     def get_available_restaurants(self):
         if not self.restaurant:
-            order_items = self.products.all()
+            order_items = self.order_items.all()
             product_ids = [order_item.product.id for order_item in order_items]
             restaurants = []
             for product_id in product_ids:
@@ -250,7 +250,7 @@ class OrderItem(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name='Заказ',
-        related_name='products',
+        related_name='order_items',
     )
     quantity = models.PositiveIntegerField(
         'Количество',
@@ -273,7 +273,7 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Элементы заказа'
 
     def __str__(self):
-        return self.id
+        return f'{self.id}'
 
     def get_cost(self):
         return self.price * self.quantity
