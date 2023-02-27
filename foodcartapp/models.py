@@ -192,9 +192,9 @@ class Order(models.Model):
             ('Сразу, электронно', 'Сразу, электронно'),
             ('Наличными', 'Наличными'),
         ))
-    restaurant = models.ForeignKey(
+    restaurant_that_will_cook = models.ForeignKey(
         Restaurant,
-        verbose_name='Ресторан',
+        verbose_name='Ресторан, где будут готовить',
         related_name='orders',
         on_delete=models.SET_NULL,
         null=True,
@@ -210,7 +210,7 @@ class Order(models.Model):
         return f"{self.firstname} {self.lastname}"
 
     def get_available_restaurants(self):
-        if not self.restaurant:
+        if not self.restaurant_that_will_cook:
             order_items = self.order_items.all()
             product_ids = [order_item.product.id for order_item in order_items]
             restaurants = []
@@ -229,7 +229,7 @@ class Order(models.Model):
             available_restaurants = restaurants[0]
             return available_restaurants
         else:
-            return [self.restaurant.name]
+            return [self.restaurant_that_will_cook.name]
 
     def get_distance(self):
         available_restaurants = self.get_available_restaurants()

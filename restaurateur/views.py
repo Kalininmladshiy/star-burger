@@ -97,7 +97,7 @@ def view_orders(request):
         .filter(~Q(order_status='выполнен'))\
         .prefetch_related('order_items')\
         .prefetch_related('order_items__product')\
-        .prefetch_related('restaurant')
+        .prefetch_related('restaurant_that_will_cook')
     return render(request, template_name='order_items.html', context={
         'orders': orders_with_costs,
     })

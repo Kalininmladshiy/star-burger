@@ -135,7 +135,7 @@ class Order(admin.ModelAdmin):
         formset.save_m2m()
 
     def save_model(self, request, obj, form, change):
-        if obj.restaurant:
+        if obj.restaurant_that_will_cook:
             obj.order_status = 'готовится'
             obj.save()
         if 'address' in form.changed_data:
