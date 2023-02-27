@@ -254,6 +254,7 @@ class OrderItem(models.Model):
     )
     quantity = models.PositiveIntegerField(
         'Количество',
+        validators=[MinValueValidator(1)],
     )
     product = models.ForeignKey(
         Product,
