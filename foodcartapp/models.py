@@ -170,9 +170,8 @@ class Order(models.Model):
             ('у курьера', 'У курьера'),
             ('выполнен', 'Выполнен'),
         ))
-    comment = models.CharField(
+    comment = models.TextField(
         'Комментарий',
-        max_length=50,
         blank=True,
     )
     registrated_at = models.DateTimeField(
