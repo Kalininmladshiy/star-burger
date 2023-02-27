@@ -248,28 +248,23 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name='Заказ',
         related_name='products',
-        null=True,
     )
     quantity = models.PositiveIntegerField(
         'Количество',
-        null=True,
     )
     product = models.ForeignKey(
         Product,
         verbose_name='Продукт',
         related_name='order_items',
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.PROTECT,
     )
     price = models.DecimalField(
         'цена',
         max_digits=8,
         decimal_places=2,
-        null=True,
-        blank=True,
         validators=[MinValueValidator(0), DecimalValidator(8, 2)],
     )
 
