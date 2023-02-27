@@ -143,7 +143,6 @@ class Order(admin.ModelAdmin):
             if created:
                 lat, lon = fetch_coordinates(obj.address)
                 place.lat = lat
-                place.save()
                 place.lon = lon
                 place.save()
 
