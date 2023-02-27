@@ -93,11 +93,11 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders_with_products = Order.objects.get_query_set_with_total_cost()\
+    orders_with_costs = Order.objects.get_query_set_with_total_cost()\
         .filter(~Q(order_status='выполнен'))\
         .prefetch_related('order_items')\
         .prefetch_related('order_items__product')\
         .prefetch_related('restaurant')
     return render(request, template_name='order_items.html', context={
-        'orders': orders_with_products,
+        'orders': orders_with_costs,
     })
