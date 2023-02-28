@@ -232,7 +232,7 @@ class Order(models.Model):
 
     def get_distance(self):
         available_restaurants = self.get_available_restaurants()
-        clients_place, create = Place.objects.get_or_create(address=self.address)
+        clients_place, created = Place.objects.get_or_create(address=self.address)
         clients_coordinates = [clients_place.lat, clients_place.lon]
         available_restaurants_distance = []
         for restaurant in available_restaurants:
