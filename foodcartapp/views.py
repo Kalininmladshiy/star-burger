@@ -1,7 +1,5 @@
-import json
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.forms.models import model_to_dict
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
@@ -10,9 +8,9 @@ from rest_framework import serializers
 
 from .models import Product, Order, OrderItem
 from distance.models import Place
-from .serializers import GetOrderSerializer
 from django.db import transaction
 from restaurateur.utils import fetch_coordinates
+from phonenumber_field.serializerfields import PhoneNumberField
 
 
 def banners_list_api(request):
@@ -68,19 +66,22 @@ def product_list_api(request):
 
 
 class OrderItemSerializer(ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    price = serializers.IntegerField(required=False)
 
     class Meta:
         model = OrderItem
-        fields = ['quantity', 'product']
+        fields = ['quantity', 'product', 'price']
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderItemSerializer(many=True, allow_empty=False)
+    products = OrderItemSerializer(many=True, allow_empty=False, source='order_items')
+    phonenumber = PhoneNumberField()
+    id = serializers.IntegerField(required=False)
 
     class Meta:
         model = Order
-        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products', 'id']
 
 
 @transaction.atomic
@@ -96,7 +97,7 @@ def register_order(request):
         address=address,
     )
 
-    order_items_fields = serializer.validated_data['products']
+    order_items_fields = serializer.validated_data['order_items']
     order_items = [OrderItem(
         order=new_order,
         price=fields['product'].price,
@@ -112,8 +113,6 @@ def register_order(request):
         place.lon = lon
         place.save()
 
-    serializer = GetOrderSerializer(data=model_to_dict(new_order))
-    serializer.is_valid(raise_exception=True)
-    if serializer.is_valid():
-        serializer.validated_data['phonenumber'] = str(new_order.phonenumber)
-    return Response(serializer.validated_data)
+    serializer = OrderSerializer(new_order)
+    serializer.data['phonenumber'] = str(new_order.phonenumber)
+    return Response(serializer.data)
