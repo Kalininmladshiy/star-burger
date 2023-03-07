@@ -223,10 +223,10 @@ class Order(models.Model):
                     available_restaurants.append(item.restaurant.name)
                 restaurants.append(available_restaurants)
 
-            for i in range(0, len(restaurants)):
-                restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
-            available_restaurants = restaurants[0]
-            return available_restaurants
+            common_restaurants = set(restaurants[0])
+            for available_restaurants in restaurants:
+                common_restaurants = common_restaurants & set(available_restaurants)
+            return list(common_restaurants)
         return [self.restaurant_that_will_cook.name]
 
     def get_distance(self):
