@@ -227,8 +227,7 @@ class Order(models.Model):
                 restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
             available_restaurants = restaurants[0]
             return available_restaurants
-        else:
-            return [self.restaurant_that_will_cook.name]
+        return [self.restaurant_that_will_cook.name]
 
     def get_distance(self):
         available_restaurants = self.get_available_restaurants()
