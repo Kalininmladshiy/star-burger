@@ -265,7 +265,6 @@ class OrderItem(models.Model):
         'цена',
         max_digits=8,
         decimal_places=2,
-        null=True,
         blank=True,
         validators=[MinValueValidator(0), DecimalValidator(8, 2)],
     )
