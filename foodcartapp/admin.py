@@ -130,7 +130,8 @@ class Order(admin.ModelAdmin):
         for obj in formset.deleted_objects:
             obj.delete()
         for instance in instances:
-            instance.price = instance.order_items.price
+            instance.price = instance.product.price
+            instance.order.save()
             instance.save()
         formset.save_m2m()
 
@@ -139,12 +140,17 @@ class Order(admin.ModelAdmin):
             obj.order_status = 'готовится'
             obj.save()
         if 'address' in form.changed_data:
-            place, created = Place.objects.get_or_create(address=obj.address)
-            if created:
+            try:
                 lat, lon = fetch_coordinates(obj.address)
+                place, created = Place.objects.get_or_create(address=obj.address)
                 place.lat = lat
                 place.lon = lon
                 place.save()
+                obj.save()
+            except TypeError:
+                print('сработала ошибка')
+        else:
+            obj.save()
 
     def response_change(self, request, obj):
         res = super(Order, self).response_change(request, obj)
@@ -157,22 +163,23 @@ class Order(admin.ModelAdmin):
             return res
 
     def formfield_for_foreignkey(self, restaurant, request, **kwargs):
-        order_id = request.resolver_match.kwargs['object_id']
-        order = super().get_queryset(request).get(id=order_id)
-        order_items = order.order_items.all()
-        product_ids = [order_item.product.id for order_item in order_items]
-        restaurants = []
-        for product_id in product_ids:
-            available_restaurants = []
-            for item in RestaurantMenuItem.objects.filter(product=product_id, availability=True):
-                available_restaurants.append(item.restaurant.id)
-            restaurants.append(available_restaurants)
+        if request.resolver_match.kwargs:
+            order_id = request.resolver_match.kwargs['object_id']
+            order = super().get_queryset(request).get(id=order_id)
+            order_items = order.order_items.all()
+            product_ids = [order_item.product.id for order_item in order_items]
+            restaurants = []
+            for product_id in product_ids:
+                available_restaurants = []
+                for item in RestaurantMenuItem.objects.filter(product=product_id, availability=True):
+                    available_restaurants.append(item.restaurant.id)
+                restaurants.append(available_restaurants)
 
-        for i in range(0, len(restaurants)):
-            restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
-        available_restaurants = restaurants[0]
-        kwargs["queryset"] = Restaurant.objects.filter(id__in=available_restaurants)
-        return super().formfield_for_foreignkey(restaurant, request, **kwargs)
+            for i in range(0, len(restaurants)):
+                restaurants[0] = list(set(restaurants[0]) & set(restaurants[i]))
+            available_restaurants = restaurants[0]
+            kwargs["queryset"] = Restaurant.objects.filter(id__in=available_restaurants)
+            return super().formfield_for_foreignkey(restaurant, request, **kwargs)
 
 
 @admin.register(OrderItem)
