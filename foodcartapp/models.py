@@ -156,7 +156,6 @@ class Order(models.Model):
     address = models.CharField(
         'Адрес доставки',
         max_length=50,
-        blank=True,
         db_index=True,
     )
     order_status = models.CharField(
