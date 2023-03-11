@@ -4,7 +4,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, F
 from django.utils import timezone
 from geopy import distance
-from restaurateur.utils import fetch_coordinates
 from distance.models import Place
 
 
