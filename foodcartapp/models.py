@@ -5,6 +5,7 @@ from django.db.models import Sum, F
 from django.utils import timezone
 from geopy import distance
 from distance.models import Place
+from django.db.models import Q
 
 
 class Restaurant(models.Model):
@@ -132,7 +133,12 @@ class OrderQuerySet(models.QuerySet):
     def get_query_set_with_total_cost(self):
         orders_with_costs = self.annotate(
             total_cost=Sum(F('order_items__price') * F('order_items__quantity'))
-        ).order_by('id')
+        )\
+            .order_by('id') \
+            .filter(~Q(order_status='выполнен')) \
+            .prefetch_related('order_items') \
+            .prefetch_related('order_items__product') \
+            .prefetch_related('restaurant_that_will_cook')
         return orders_with_costs
 
 
