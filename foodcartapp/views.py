@@ -109,7 +109,6 @@ def register_order(request):
     if created:
         lat, lon = fetch_coordinates(address)
         place.lat = lat
-        place.save()
         place.lon = lon
         place.save()
 
