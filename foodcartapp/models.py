@@ -174,7 +174,6 @@ class Order(models.Model):
     )
     registrated_at = models.DateTimeField(
         'Время создания',
-        null=True,
         db_index=True,
         default=timezone.now,
     )
