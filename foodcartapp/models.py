@@ -206,25 +206,25 @@ class Order(models.Model):
         return f"{self.firstname} {self.lastname}"
 
     def get_available_restaurants(self):
-        if not self.restaurant_that_will_cook:
-            order_items = self.order_items.all()
-            product_ids = [order_item.product.id for order_item in order_items]
-            restaurants = []
-            for product_id in product_ids:
-                available_restaurants = []
-                restaurant_menu_items = RestaurantMenuItem.objects.filter(
-                    product=product_id,
-                    availability=True,
-                ).prefetch_related('restaurant')
-                for item in restaurant_menu_items:
-                    available_restaurants.append(item.restaurant.name)
-                restaurants.append(available_restaurants)
+        if self.restaurant_that_will_cook:
+            return [self.restaurant_that_will_cook.name]
+        order_items = self.order_items.all()
+        product_ids = [order_item.product.id for order_item in order_items]
+        restaurants = []
+        for product_id in product_ids:
+            available_restaurants = []
+            restaurant_menu_items = RestaurantMenuItem.objects.filter(
+                product=product_id,
+                availability=True,
+            ).prefetch_related('restaurant')
+            for item in restaurant_menu_items:
+                available_restaurants.append(item.restaurant.name)
+            restaurants.append(available_restaurants)
 
-            common_restaurants = set(restaurants[0])
-            for available_restaurants in restaurants:
-                common_restaurants = common_restaurants & set(available_restaurants)
-            return list(common_restaurants)
-        return [self.restaurant_that_will_cook.name]
+        common_restaurants = set(restaurants[0])
+        for available_restaurants in restaurants:
+            common_restaurants = common_restaurants & set(available_restaurants)
+        return list(common_restaurants)
 
     def get_distance(self):
         available_restaurants = self.get_available_restaurants()
