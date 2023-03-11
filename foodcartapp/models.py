@@ -235,8 +235,8 @@ class Order(models.Model):
             address = Restaurant.objects.get(name=restaurant).address
             restaurant_place = Place.objects.get(address=address)
             restaurant_coordinates = [restaurant_place.lat, restaurant_place.lon]
-            rest_distance = distance.distance(clients_coordinates, restaurant_coordinates).km
-            available_restaurants_distance.append((restaurant, rest_distance))
+            distance_from_rest_to_cl = distance.distance(clients_coordinates, restaurant_coordinates).km
+            available_restaurants_distance.append((restaurant, distance_from_rest_to_cl))
         return sorted(available_restaurants_distance, key=lambda item: item[1])
 
 
