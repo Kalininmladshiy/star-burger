@@ -172,7 +172,7 @@ class Order(models.Model):
         'Комментарий',
         blank=True,
     )
-    registrated_at = models.DateTimeField(
+    registered_at = models.DateTimeField(
         'Время создания',
         db_index=True,
         default=timezone.now,
