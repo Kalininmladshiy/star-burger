@@ -1,5 +1,5 @@
 from django.db import migrations
-from restaurateur.utils import fetch_coordinates
+from restaurateur.coordinate_tools import fetch_coordinates
 
 
 def add_lat_lon(apps, schema_editor):

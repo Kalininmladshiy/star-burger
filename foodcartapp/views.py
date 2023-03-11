@@ -9,7 +9,7 @@ from rest_framework import serializers
 from .models import Product, Order, OrderItem
 from distance.models import Place
 from django.db import transaction
-from restaurateur.utils import fetch_coordinates
+from restaurateur.coordinate_tools import fetch_coordinates
 from phonenumber_field.serializerfields import PhoneNumberField
 
 

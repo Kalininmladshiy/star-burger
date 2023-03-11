@@ -12,7 +12,7 @@ from .models import RestaurantMenuItem
 from .models import Order, OrderItem
 
 from distance.models import Place
-from restaurateur.utils import fetch_coordinates
+from restaurateur.coordinate_tools import fetch_coordinates
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
