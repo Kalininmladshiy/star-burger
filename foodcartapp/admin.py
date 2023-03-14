@@ -157,8 +157,6 @@ class Order(admin.ModelAdmin):
         if "next" in request.GET:
             if url_has_allowed_host_and_scheme(request.GET['next'], None):
                 return redirect(request.GET['next'])
-            else:
-                raise
         else:
             return res
 
