@@ -83,6 +83,17 @@ class OrderSerializer(ModelSerializer):
         model = Order
         fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products', 'id']
 
+    def create(self, validated_data):
+        order_items_fields = validated_data.pop('order_items', None)
+        new_order = Order.objects.create(**validated_data)
+        order_items = [OrderItem(
+            order=new_order,
+            price=fields['product'].price,
+            **fields,
+        ) for fields in order_items_fields]
+        OrderItem.objects.bulk_create(order_items)
+        return new_order
+
 
 @transaction.atomic
 @api_view(['POST'])
@@ -90,20 +101,8 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     address = serializer.validated_data['address']
-    new_order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        phonenumber=serializer.validated_data['phonenumber'],
-        address=address,
-    )
 
-    order_items_fields = serializer.validated_data['order_items']
-    order_items = [OrderItem(
-        order=new_order,
-        price=fields['product'].price,
-        **fields,
-    ) for fields in order_items_fields]
-    OrderItem.objects.bulk_create(order_items)
+    new_order = serializer.save()
 
     place, created = Place.objects.get_or_create(address=address)
     if created:
