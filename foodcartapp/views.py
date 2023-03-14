@@ -107,10 +107,13 @@ def register_order(request):
 
     place, created = Place.objects.get_or_create(address=address)
     if created:
-        lat, lon = fetch_coordinates(address)
-        place.lat = lat
-        place.lon = lon
-        place.save()
+        try:
+            lat, lon = fetch_coordinates(address)
+            place.lat = lat
+            place.lon = lon
+            place.save()
+        except ConnectionError:
+            pass
 
     serializer = OrderSerializer(new_order)
     serializer.data['phonenumber'] = str(new_order.phonenumber)
