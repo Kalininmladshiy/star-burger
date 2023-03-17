@@ -4,6 +4,8 @@ from rest_framework import serializers
 from .models import Product, Order, OrderItem
 from phonenumber_field.serializerfields import PhoneNumberField
 
+from django.db import transaction
+
 
 class OrderItemSerializer(ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -23,6 +25,7 @@ class OrderSerializer(ModelSerializer):
         model = Order
         fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products', 'id']
 
+    @transaction.atomic
     def create(self, validated_data):
         order_items_fields = validated_data.pop('order_items', None)
         new_order = Order.objects.create(**validated_data)

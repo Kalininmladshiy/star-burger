@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from .models import Product
 from distance.models import Place
-from django.db import transaction
 from restaurateur.coordinate_tools import fetch_coordinates
 from .serializers import OrderSerializer
 
@@ -62,7 +61,6 @@ def product_list_api(request):
     })
 
 
-@transaction.atomic
 @api_view(['POST'])
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
