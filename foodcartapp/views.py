@@ -80,5 +80,4 @@ def register_order(request):
             pass
 
     serializer = OrderSerializer(new_order)
-    serializer.data['phonenumber'] = str(new_order.phonenumber)
     return Response(serializer.data)
