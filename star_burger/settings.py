@@ -13,10 +13,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', True)
+DEBUG = env.bool('DEBUG', False)
 YANDEX_APIKEY = env('API_KEY_YANDEX')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+ALLOWED_HOSTS = ("www.digitalhistorybook.ru", "digitalhistorybook.ru")
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
-    'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -90,13 +90,7 @@ MEDIA_URL = '/media/'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://{0}:{1}@{2}:{3}/{4}'.format(
-            env('DB_USER'),
-            env('DB_PASSWORD'),
-            env('DB_HOST'),
-            env('DB_PORT'),
-            env('DB_NAME'),
-        )
+        default=env.str('DATABASE_URL')
     )
 }
 
