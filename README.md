@@ -1,4 +1,5 @@
 # [Сайт доставки еды Star Burger](https://www.digitalhistorybook.ru/)
+[сайт находится по данному адресу](https://www.digitalhistorybook.ru/)
 
 Это сайт сети ресторанов Star Burger. Здесь можно заказать превосходные бургеры с доставкой на дом.
 
@@ -150,11 +151,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `API_KEY_YANDEX` — [API Яндекс-геокодера](https://developer.tech.yandex.ru/services/)
 - `ROLLBAR` - название окружения для системы логирования `Rollbar`
 - `TOKEN_ROLLBAR` - токен для системы логирования `Rollbar`
-- `DB_NAME` - имя Postgres бд
-- `DB_USER` - имя пользователя Postgres бд 
-- `DB_PASSWORD` - пароль Postgres бд
-- `DB_HOST` - хост Postgres бд
-- `DB_PORT` - порт Postgres бд
+- `DATABASE_URL` - [см. здесь](https://github.com/jazzband/dj-database-url)
 
 ## Цели проекта
 
