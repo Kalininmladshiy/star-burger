@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e 
+set -o pipefail
+
+cd ../opt/star-burger
+git pull
+. ./venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+echo "Собрали бэкенд"
+npm ci --dev
+./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+echo "Собрали фронтенд"
+python manage.py collectstatic
+cd ../../etc/systemd/system
+systemctl daemon-reload
+systemctl stop star_burger.service
+systemctl start star_burger.service
+echo "Деплой закончен"
+JSON_DATA=$(jq --null-input --arg revision "$(git rev-parse --short HEAD)" '{"environment": "production", "revision": $revision, "rollbar_name": "Maksim_devman", "local_username": "Maksim"}')
+curl -H "X-Rollbar-Access-Token: d357ef63736340b6b400fd42247bdb2c" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d "${JSON_DATA}"
+echo "Добавили деплой в Rollbar"
+
