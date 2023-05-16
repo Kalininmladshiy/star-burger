@@ -2,6 +2,8 @@
 set -e 
 set -o pipefail
 
+exec <&-
+
 cd ../opt/star-burger
 git pull
 . ./venv/bin/activate
@@ -17,7 +19,6 @@ systemctl daemon-reload
 systemctl stop star_burger.service
 systemctl start star_burger.service
 echo "Деплой закончен"
+echo "Добавляем деплой в Rollbar"
 JSON_DATA=$(jq --null-input --arg revision "$(git rev-parse --short HEAD)" '{"environment": "production", "revision": $revision, "rollbar_name": "Maksim_devman", "local_username": "Maksim"}')
-curl -H "X-Rollbar-Access-Token: d357ef63736340b6b400fd42247bdb2c" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d "${JSON_DATA}"
-echo "Добавили деплой в Rollbar"
-
+curl -H "X-Rollbar-Access-Token: ${TOKEN_ROLLBAR}" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d "${JSON_DATA}"
