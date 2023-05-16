@@ -2,19 +2,15 @@
 set -e 
 set -o pipefail
 
-exec <&-
-
-cd ../opt/star-burger
 git pull
 . ./venv/bin/activate
 pip install -r requirements.txt
-python manage.py migrate
+python manage.py migrate --noinput
 echo "Собрали бэкенд"
 npm ci --dev
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 echo "Собрали фронтенд"
-python manage.py collectstatic
-cd ../../etc/systemd/system
+python manage.py collectstatic --noinput
 systemctl daemon-reload
 systemctl stop star_burger.service
 systemctl start star_burger.service
