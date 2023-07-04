@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  back:
+    image: back-django:ver1-python
+    build:
+      context: .
+      dockerfile: back.dockerfile
+    container_name: back1
+    environment:
+      SECRET_KEY: $SECRET_KEY
+      API_KEY_YANDEX: $API_KEY_YANDEX
+      ROLLBAR: $ROLLBAR
+      TOKEN_ROLLBAR: $TOKEN_ROLLBAR
+      DB_NAME: $DB_NAME
+      DB_USER: $DB_USER
+      DB_PASSWORD: $DB_PASSWORD
+      DB_HOST: $DB_HOST
+      DB_PORT: $DB_PORT
+    ports:
+      - "127.0.0.1:8080:8080"
+    command: python manage.py runserver 0.0.0.0:8080 #gunicorn -w 3 -b 0.0.0.0:8080 star_burger.wsgi:application
+    depends_on:
+      - db
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
+    ports:
+      - "5432:5432"
+  front:
+    image: front-django:ver1-node
+    build:
+      context: .
+      dockerfile: front.dockerfile
+    container_name: front1
+    ports:
+      - "8081:8081"
+    command: ./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./"
+    depends_on:
+      - db
+      - back
+
+
+#  nginx:
+#    restart: always
+#    image: nginx:latest
+#    expose:
+#      - 8080
+#    ports:
+#      - "80:8080"
+#    volumes:
+#      - ./<project>/static:/srv/www/<project>/static
+#      - ./<project>/media:/srv/www/<project>/media
+#      - ./<project>/logs:/srv/www/<project>/logs
+#      - ./docker/nginx:/etc/nginx/conf.d
+#    depends_on:
+#      - db
