@@ -2,6 +2,7 @@ version: '3.8'
 services:
   back:
     image: back-django:ver1-python
+    restart: always
     build:
       context: .
       dockerfile: back.dockerfile
@@ -11,18 +12,15 @@ services:
       API_KEY_YANDEX: $API_KEY_YANDEX
       ROLLBAR: $ROLLBAR
       TOKEN_ROLLBAR: $TOKEN_ROLLBAR
-      DB_NAME: $DB_NAME
-      DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
-      DB_HOST: $DB_HOST
-      DB_PORT: $DB_PORT
+      DATABASE_URL: $DATABASE_URL
     ports:
       - "127.0.0.1:8080:8080"
-    command: python manage.py runserver 0.0.0.0:8080 #gunicorn -w 3 -b 0.0.0.0:8080 star_burger.wsgi:application
+    command: gunicorn -w 3 -b 0.0.0.0:8080 star_burger.wsgi:application
     depends_on:
       - db
   db:
     image: postgres
+    restart: always
     environment:
       POSTGRES_USER: $DB_USER
       POSTGRES_PASSWORD: $DB_PASSWORD
@@ -41,19 +39,13 @@ services:
     depends_on:
       - db
       - back
-
-
-#  nginx:
-#    restart: always
-#    image: nginx:latest
-#    expose:
-#      - 8080
-#    ports:
-#      - "80:8080"
-#    volumes:
-#      - ./<project>/static:/srv/www/<project>/static
-#      - ./<project>/media:/srv/www/<project>/media
-#      - ./<project>/logs:/srv/www/<project>/logs
-#      - ./docker/nginx:/etc/nginx/conf.d
-#    depends_on:
-#      - db
+  nginx:
+    restart: always
+    image: nginx:ver1
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - db

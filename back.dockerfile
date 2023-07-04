@@ -11,3 +11,4 @@ COPY templates /star-burger/templates
 COPY manage.py /star-burger
 COPY requirements.txt /star-burger
 RUN pip install -r requirements.txt
+CMD ["python3", "manage.py", "collectstatic"]
