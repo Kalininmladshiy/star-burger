@@ -2,6 +2,7 @@ FROM python:3.9
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 WORKDIR /star-burger
+COPY assets /star-burger/assets
 COPY distance /star-burger/distance
 COPY foodcartapp /star-burger/foodcartapp
 COPY media /star-burger/media

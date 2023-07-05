@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: back.dockerfile
+    volumes:
+      - '.:/star-burger'
     container_name: back1
     environment:
       SECRET_KEY: $SECRET_KEY
@@ -32,6 +34,8 @@ services:
     build:
       context: .
       dockerfile: front.dockerfile
+    volumes:
+      - '.:/star-burger'
     container_name: front1
     ports:
       - "8081:8081"
